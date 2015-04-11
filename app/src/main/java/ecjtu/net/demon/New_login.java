@@ -102,7 +102,8 @@ public class New_login extends ActionBarActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Toast.makeText(New_login.this, "网络请求失败", Toast.LENGTH_SHORT).show();
+                ToastMsg.builder.display("网络请求失败",300);
+                //Toast.makeText(New_login.this, "网络请求失败", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -111,7 +112,7 @@ public class New_login extends ActionBarActivity {
         PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("alpha", 0f, 1f);
         PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("scaleX", 0, 1f);
         PropertyValuesHolder pvhZ = PropertyValuesHolder.ofFloat("scaleY", 0, 1f);
-        PropertyValuesHolder pvhH = PropertyValuesHolder.ofFloat("y", site.getY() + 500f, site.getY() + 250f);
+        PropertyValuesHolder pvhH = PropertyValuesHolder.ofFloat("y", site.getY() + 500f, site.getY() + 350f);
         Animator objectAnimator =  ObjectAnimator.ofPropertyValuesHolder(view, pvhX, pvhY, pvhZ, pvhH).setDuration(2000);
         objectAnimator.start();
         objectAnimator.addListener(new Animator.AnimatorListener() {

@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
@@ -18,9 +19,11 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -28,6 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gc.materialdesign.views.Button;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -46,8 +50,11 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.xml.datatype.Duration;
 
 import cn.jpush.android.api.InstrumentedActivity;
 import cn.jpush.android.api.JPushInterface;
@@ -80,6 +87,7 @@ public class main extends InstrumentedActivity {
     private boolean isLogin = false;
     private NotificationManager mNotificationManager; //顶部通知栏的控制器
     private DisplayImageOptions options;
+    private int duration = 200;
 
     private void DownloadByAndroid(String url){
         Uri uri = Uri.parse(url);
@@ -163,12 +171,13 @@ public class main extends InstrumentedActivity {
         sm.showContent();
     }
 
-    public static String getFileMD5(File file) {
+   /* public static String getFileMD5(File file) {
         if (!file.isFile()) {
             return null;
         }
-        MessageDigest digest = null;
-        FileInputStream in = null;
+        MessageDigest digest;
+        FileInputStream in;
+        in = null;
         byte buffer[] = new byte[1024];
         int len;
         try {
@@ -185,7 +194,7 @@ public class main extends InstrumentedActivity {
         BigInteger bigInt = new BigInteger(1, digest.digest());
         return bigInt.toString(16);
     }
-
+*/
 
     private void initNotification()
     {
@@ -200,7 +209,7 @@ public class main extends InstrumentedActivity {
                 .setPriority(Notification.PRIORITY_DEFAULT) //设置该通知优先级
                 .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
                 .setDefaults(Notification.DEFAULT_LIGHTS)//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.logo_cycle)
                 .setProgress(100, 0, false);
         Notification notification = mBuilder.build();
         notification.flags = Notification.FLAG_ONLY_ALERT_ONCE;
@@ -290,7 +299,6 @@ public class main extends InstrumentedActivity {
         @Override
         public void onRefresh() {
             main.this.setNewslist(url, null, false);
-            // new getNewsList(url,null,false).start();//下拉刷新时调用
         }
     };
 
@@ -308,7 +316,6 @@ public class main extends InstrumentedActivity {
                 String articleId = String.valueOf(hashMap.get("id"));
                 Log.i("tag", "the articleId is " + articleId);
                 main.this.setNewslist(url, articleId, false);
-                //new getNewsList(url, articleId, false).start();//向上滑动时调用
             }
         });
     }
@@ -334,7 +341,8 @@ public class main extends InstrumentedActivity {
                     turn2Activity(Setting.class,null);
                     break;
                 default:
-                    Toast.makeText(main.this, "开发中。。。", Toast.LENGTH_SHORT).show();
+                    ToastMsg.builder.display("开发中...",duration);
+                    //Toast.makeText(main.this, "开发中。。。", Toast.LENGTH_SHORT).show();
                 /*case R.id.yktquery:;break;
                 case R.id.bookquery:;break;
                 case R.id.moonModel:;break;
@@ -346,10 +354,22 @@ public class main extends InstrumentedActivity {
             }
         }else{
             turn2Activity(LoginActivity.class,null);
-            Toast.makeText(main.this, "请先行登入", Toast.LENGTH_SHORT).show();
+            ToastMsg.builder.display("请先行登入",duration);
+            //Toast.makeText(main.this, "请先行登入", Toast.LENGTH_SHORT).show();
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                sm.toggle();
+                //
+                break;
+            default:return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     private void turn2Activity(Class activity,String url) {
         Intent intent = new Intent();
@@ -378,7 +398,7 @@ public class main extends InstrumentedActivity {
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
+    public boolean dispatchTouchEvent( MotionEvent ev) {
         return super.dispatchTouchEvent(ev);
     }
 
@@ -390,17 +410,22 @@ public class main extends InstrumentedActivity {
     public void setActionBarLayout(int layoutID) {
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(false);
-            actionBar.setDisplayShowCustomEnabled(true);
-            LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-            View view = inflater.inflate(layoutID, null);
-            ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
+//            actionBar.setDisplayShowTitleEnabled(false);
+//            actionBar.setDisplayShowHomeEnabled(false);
+//            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setLogo(R.drawable.sliderbutton);
+            actionBar.setTitle("新闻");
+//            LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+//            View view = inflater.inflate(layoutID, null);
+//            TextView title = (TextView) view.findViewById(R.id.title);
+//            title.setText("新闻");
+/*            ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
                     ActionBar.LayoutParams.MATCH_PARENT,
-                    ActionBar.LayoutParams.MATCH_PARENT);
-            actionBar.setCustomView(view, layoutParams);
+                    ActionBar.LayoutParams.MATCH_PARENT);*/
+//            actionBar.setCustomView(view);
         }
-        this.setTitle("你妹妹的点点");
+
     }
 
 
@@ -413,10 +438,11 @@ public class main extends InstrumentedActivity {
     }
 
     private void exitInBack2() {
-        Timer tExit = null;
+        Timer tExit;
         if (!isExit) {
             isExit = true;
-            Toast.makeText(main.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            ToastMsg.builder.display("再按一次退出程序",duration);
+            //Toast.makeText(main.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
             tExit = new Timer();
             tExit.schedule(new TimerTask() {
                 @Override
@@ -431,7 +457,7 @@ public class main extends InstrumentedActivity {
     }
 
     private void setNewslist(String url,final String lastId ,Boolean isInit){
-        final HashMap<String, Object> list = new HashMap<String, Object>();
+        final HashMap<String, Object> list = new HashMap<>();
         if(lastId != null){
             url = url + "?until=" + lastId;
         }
@@ -462,7 +488,8 @@ public class main extends InstrumentedActivity {
         HttpAsync.get(url,new JsonHttpResponseHandler(){
             @Override
             public void onStart() {
-                Toast.makeText(main.this,"正在加载。。。",Toast.LENGTH_SHORT).show();
+                ToastMsg.builder.display("正在加载...",duration);
+                //Toast.makeText(main.this,"正在加载。。。",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -496,7 +523,8 @@ public class main extends InstrumentedActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 super.onFailure(statusCode, headers, responseString, throwable);
-                Toast.makeText(main.this,"网络环境好像不是很好呀~！",Toast.LENGTH_SHORT).show();
+                ToastMsg.builder.display("网络环境好像不是很好呀~！",duration);
+                //Toast.makeText(main.this,"网络环境好像不是很好呀~！",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -508,15 +536,15 @@ public class main extends InstrumentedActivity {
     }
     /**
      * 将json数组变成arraylist
-     * @param jsonArray
-     * @return
+     * @param jsonArray 输入你转换的jsonArray
+     * @return 返回arraylist
      */
     private ArrayList<HashMap<String,Object>> jsonArray2Arraylist(JSONArray jsonArray){
-        ArrayList<HashMap<String,Object>> arrayList = new ArrayList<HashMap<String, Object>>();
+        ArrayList<HashMap<String,Object>> arrayList = new ArrayList<>();
         for (int i = 0; i< jsonArray.length(); i++){
             try {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                HashMap<String,Object> item = new HashMap<String,Object>();
+                HashMap<String,Object> item = new HashMap<>();
                 item.put("id",jsonObject.getInt("id"));
                 item.put("title",jsonObject.getString("title"));
                 item.put("updated_at",jsonObject.getString("updated_at"));
@@ -542,7 +570,8 @@ public class main extends InstrumentedActivity {
             public void onFailure(int i, Header[] headers, Throwable throwable, File file) {
                 mBuilder.setContentText("更新失败~！");
                 mNotificationManager.notify(1, mBuilder.build());
-                Toast.makeText(main.this,"更新失败",Toast.LENGTH_SHORT).show();
+                ToastMsg.builder.display("更新失败",duration);
+                //Toast.makeText(main.this,"更新失败",Toast.LENGTH_SHORT).show();
                 DownloadByAndroid(apkUrl);
             }
 

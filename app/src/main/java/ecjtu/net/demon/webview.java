@@ -17,7 +17,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 
 public class webview extends Activity {
@@ -33,6 +32,7 @@ public class webview extends Activity {
         setContentView(R.layout.activity_webview);
         actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(true);
         webView = (WebView) findViewById(R.id.webView);
         Intent intent = getIntent();
         url = intent.getStringExtra("url");
@@ -43,7 +43,7 @@ public class webview extends Activity {
             public void onReceivedTitle(WebView view, String title) {
                 webview.this.title = title;
                 actionBar.setTitle(title);
-                super.onReceivedTitle(view, title);
+                //super.onReceivedTitle(view, title);
             }
         });
         WebSettings ws = webView.getSettings();
@@ -105,7 +105,7 @@ public class webview extends Activity {
         }
         if (id == R.id.action_refresh) {
             webView.reload();
-            Toast.makeText(this, "正在刷新", Toast.LENGTH_SHORT).show();
+            ToastMsg.builder.display("正在刷新",300);
             return true;
         }
         if (id == R.id.share){
